@@ -13,6 +13,10 @@ interface PostItemProps {
   userId?: string;
 }
 
+interface ColorfulTextProps {
+  text: string;
+}
+
 const PostItem: React.FC<PostItemProps> = ({ data = {}, userId }) => {
   const router = useRouter();
   const loginModal = useLoginModal();
@@ -48,6 +52,15 @@ const PostItem: React.FC<PostItemProps> = ({ data = {}, userId }) => {
 
     return formatDistanceToNowStrict(new Date(data.createdAt));
   }, [data.createdAt])
+
+
+  const ColorfulText: React.FC<ColorfulTextProps> = ({ text }) => {
+  // Use regular expression to find words starting with '#'
+  const regex = /#\w+/g;
+  const coloredText = text.replace(regex, (match) => `<span style="color: #1DA1F2">${match}</span>`);
+
+  return <div dangerouslySetInnerHTML={{ __html: coloredText }} />;
+};
 
   return (
     <div 
@@ -90,7 +103,7 @@ const PostItem: React.FC<PostItemProps> = ({ data = {}, userId }) => {
             </span>
           </div>
           <div className="text-white mt-1">
-            {data.body}
+            <ColorfulText text={data.body} />
           </div>
           <div className="flex flex-row items-center mt-3 gap-10">
             <div 
