@@ -67,6 +67,28 @@ const CommentItem: React.FC<CommentItemProps> = ({ data = {} }) => {
           <div className="text-white mt-1">
             {data.body}
           </div>
+          {data.image && (
+              <div>
+                <img
+                  src={data.image}
+                  className="
+              w-full
+              h-96
+              object-cover
+              rounded-md
+              cursor-pointer
+              hover:opacity-80
+              transition
+            "
+                />
+                <hr
+                className="
+                my-2
+                border-neutral-700"
+              />
+              </div>
+            )}
+            
         </div>
       </div>
     </div>
