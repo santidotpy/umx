@@ -1,24 +1,23 @@
-import axios from "axios";
-import { useCallback, useState } from "react";
-import { toast } from "react-hot-toast";
-import { AiOutlineFileImage } from "react-icons/ai";
+import axios from 'axios';
+import { useCallback, useState } from 'react';
+import { toast } from 'react-hot-toast';
 
-import useLoginModal from "@/hooks/useLoginModal";
-import useRegisterModal from "@/hooks/useRegisterModal";
-import useCurrentUser from "@/hooks/useCurrentUser";
-import usePosts from "@/hooks/usePosts";
-import usePost from "@/hooks/usePost";
+import useLoginModal from '@/hooks/useLoginModal';
+import useRegisterModal from '@/hooks/useRegisterModal';
+import useCurrentUser from '@/hooks/useCurrentUser';
+import usePosts from '@/hooks/usePosts';
+import usePost from '@/hooks/usePost';
 
-import Avatar from "./Avatar";
-import Button from "./Button";
+import Avatar from './Avatar';
+import Button from './Button';
 
 interface FormProps {
-  placeholder: string;
   isComment?: boolean;
   postId?: string;
+    oldBody?: string;
 }
 
-const Form: React.FC<FormProps> = ({ placeholder, isComment, postId }) => {
+const Form: React.FC<FormProps> = ({ isComment, postId, oldBody }) => {
   const registerModal = useRegisterModal();
   const loginModal = useLoginModal();
 
@@ -26,25 +25,30 @@ const Form: React.FC<FormProps> = ({ placeholder, isComment, postId }) => {
   const { mutate: mutatePosts } = usePosts();
   const { mutate: mutatePost } = usePost(postId as string);
 
-  const [body, setBody] = useState("");
-  const [image, setImage] = useState("");
+  const [body, setBody] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+
+  // set the old body to the current body
+    if (body === '' && oldBody !== undefined) {
+        setBody(oldBody);
+    }
 
   const onSubmit = useCallback(async () => {
     try {
       setIsLoading(true);
 
-      const url = isComment ? `/api/comments?postId=${postId}` : "/api/posts";
-      console.log(image);
-      await axios.post(url, { body, image });
+      const url = isComment ? `/api/comments?postId=${postId}` : `/api/posts?postId=${postId}`;
 
-      toast.success("Post created");
-      setBody("");
-      setImage("");
+      await axios.put(url, { body });
+
+      setBody('');
       mutatePosts();
       mutatePost();
+      // reload the page
+        window.location.reload();
+      toast.success('Post edited');
     } catch (error) {
-      toast.error("Something went wrong");
+      toast.error('Something went wrong');
     } finally {
       setIsLoading(false);
     }
@@ -75,9 +79,9 @@ const Form: React.FC<FormProps> = ({ placeholder, isComment, postId }) => {
                 placeholder-neutral-500 
                 text-white
               "
-              placeholder={placeholder}
-            ></textarea>
-            <hr
+              >
+            </textarea>
+            <hr 
               className="
                 opacity-0 
                 peer-focus:opacity-100 
@@ -86,35 +90,14 @@ const Form: React.FC<FormProps> = ({ placeholder, isComment, postId }) => {
                 border-neutral-800 
                 transition"
             />
-            {/* add image */}
-            <div className="flex flex-row items-center justify-between">
-              <div className="flex flex-row items-center gap-2">
-                <AiOutlineFileImage className="text-2xl text-neutral-400 pt-1" />
-                <textarea
-                  
-                  className="bg-black text-white w-full outline-none pt-7"
-                  placeholder="Add Image URL"
-                  onChange={(event) => setImage(event.target.value)}
-                  value={image}
-                />
-              </div>
-              
-            </div>
-
             <div className="mt-4 flex flex-row justify-end">
-              <Button
-                disabled={isLoading || !body || body.length > 140}
-                onClick={onSubmit}
-                label="Post"
-              />
+              <Button disabled={isLoading || !body} onClick={onSubmit} label="Edit" />
             </div>
           </div>
         </div>
       ) : (
         <div className="py-8">
-          <h1 className="text-white text-2xl text-center mb-4 font-bold">
-            Welcome to UMX
-          </h1>
+          <h1 className="text-white text-2xl text-center mb-4 font-bold">Welcome to UMX</h1>
           <div className="flex flex-row items-center justify-center gap-4">
             <Button label="Login" onClick={loginModal.onOpen} />
             <Button label="Register" onClick={registerModal.onOpen} secondary />
